@@ -54,11 +54,11 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                 <Feather className="w-4 h-4 text-charcoal-intense" />
               </div>
               <span className="font-serif text-lg font-bold text-cream-base tracking-tight">
-                Vellum & Vector
+                LLM Review Pro
               </span>
             </div>
             <p className="font-serif italic text-sm text-cream-dark/60 leading-relaxed max-w-sm">
-              "A digital sanctuary for high-fidelity technical writing, minimal typography layouts, and tactical digitalism in design."
+              "Expert evaluations and in-depth analytical reviews of large language models, AI architectures, and intelligent systems."
             </p>
           </div>
 
@@ -141,7 +141,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
 
         {/* Legal bar */}
         <div className="flex flex-col sm:flex-row justify-between items-center pt-8 mt-8 text-xs text-cream-dark/30 font-sans gap-4">
-          <p>© {new Date().getFullYear()} Vellum & Vector. Made for publishers holding values of editorial craftsmanship.</p>
+          <p>© {new Date().getFullYear()} LLM Review Pro. All rights reserved. In-depth evaluations of neural structures.</p>
           <div className="flex gap-6">
             <a href="/privacy" onClick={(e) => { e.preventDefault(); onNavigate('privacy'); }} className="hover:text-cream-base transition-colors cursor-pointer">Privacy Policy</a>
             <a href="/terms" onClick={(e) => { e.preventDefault(); onNavigate('terms'); }} className="hover:text-cream-base transition-colors cursor-pointer">CMS Terms</a>

@@ -79,7 +79,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onBack }
             Admin Lockout
           </h1>
           <p className="text-xs text-[#7c7a72] leading-relaxed">
-            Verify layout authorization parameters to gain writing privileges on the Vellum & Vector server engine. Please login below:
+            Verify layout authorization parameters to gain writing privileges on the LLM Review Pro engine. Please login below:
           </p>
         </div>
 

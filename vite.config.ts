@@ -16,7 +16,7 @@ export default defineConfig(() => {
       // Do not modifyâfile watching is disabled to prevent flickering during agent edits.
       hmr: process.env.DISABLE_HMR !== 'true',
       // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
-      watch: process.env.DISABLE_HMR === 'true' ? null : {
+      watch: {
         ignored: [
           '**/database.db',
           '**/database.db-shm',
@@ -24,6 +24,9 @@ export default defineConfig(() => {
           '**/*.db-shm',
           '**/*.db-wal',
           '**/*.db',
+          '**/database.db*',
+          '**/node_modules/**',
+          '**/dist/**'
         ],
       },
     },

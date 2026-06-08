@@ -36,7 +36,7 @@ export const INITIAL_ARTICLES: Article[] = [
     tags: ['Programming', 'Functional', 'Clean Code', 'Web Architecture'],
     views: 12402,
     readingTime: '12 min read',
-    seoTitle: 'The Quiet Architecture of Functional Programming | Vellum & Vector',
+    seoTitle: 'The Quiet Architecture of Functional Programming | LLM Review Pro',
     seoDescription: 'Discover how functional programming principles like immutability and state purity are driving modern frontend application architecture.',
     createdAt: '2024-10-24T10:00:00Z'
   },
@@ -181,7 +181,7 @@ print(f"Applied spacing: {spacing}px")</code></pre>
     tags: ['Tech', 'EdgeComputing', 'Security', 'DevOps'],
     views: 4210,
     readingTime: '6 min read',
-    seoTitle: 'Edge Computing Security Risks & Solutions | Vellum & Vector',
+    seoTitle: 'Edge Computing Security Risks & Solutions | LLM Review Pro',
     seoDescription: 'Discover the distinct cybersecurity risks brought by server distribution and the top solutions for securing edge infrastructures.',
     createdAt: '2024-11-12T12:00:00Z'
   },
@@ -209,7 +209,7 @@ print(f"Applied spacing: {spacing}px")</code></pre>
     tags: ['Programming', 'TypeScript', 'Metaprogramming', 'WebDevelopment'],
     views: 8940,
     readingTime: '9 min read',
-    seoTitle: 'TypeScript 5.0 New Decorator Guide | Vellum & Vector',
+    seoTitle: 'TypeScript 5.0 New Decorator Guide | LLM Review Pro',
     seoDescription: 'Master modern ECMA standard decorators introduced natively in TS 5.0 with code illustrations and practical design patterns.',
     createdAt: '2024-12-05T09:00:00Z'
   },
@@ -237,7 +237,7 @@ print(f"Applied spacing: {spacing}px")</code></pre>
     tags: ['Travel', 'Kyoto', 'Mindfulness', 'Sabbatical'],
     views: 3205,
     readingTime: '5 min read',
-    seoTitle: 'My Kyoto Sabbatical Mindful Reflections | Vellum & Vector',
+    seoTitle: 'My Kyoto Sabbatical Mindful Reflections | LLM Review Pro',
     seoDescription: 'Read about Zen aesthetics, quiet garden paths, and finding focus outside of the technology pipeline in historic Kyoto, Japan.',
     createdAt: '2025-01-15T15:00:00Z'
   },
@@ -265,7 +265,7 @@ print(f"Applied spacing: {spacing}px")</code></pre>
     tags: ['Photography', 'StreetArt', 'Composition', 'ShadowWork'],
     views: 1852,
     readingTime: '7 min read',
-    seoTitle: 'Chiaroscuro & Shadow Composition in Photography | Vellum & Vector',
+    seoTitle: 'Chiaroscuro & Shadow Composition in Photography | LLM Review Pro',
     seoDescription: 'Explore advanced photography guidelines on how to harness contrast, exposure bias, and deep negative space to craft outstanding visual narratives.',
     createdAt: '2025-02-18T18:00:00Z'
   },
@@ -293,7 +293,7 @@ print(f"Applied spacing: {spacing}px")</code></pre>
     tags: ['Programming', 'Python', 'Microservices', 'SystemDesign'],
     views: 5691,
     readingTime: '9 min read',
-    seoTitle: 'Legacy Code to Python Microservices Migration | Vellum & Vector',
+    seoTitle: 'Legacy Code to Python Microservices Migration | LLM Review Pro',
     seoDescription: 'Step-by-step case study detailing how our design team partitioned monolithic routines into scalable asynchrononous routines in Python.',
     createdAt: '2025-03-10T11:00:00Z'
   },
@@ -321,7 +321,7 @@ print(f"Applied spacing: {spacing}px")</code></pre>
     tags: ['Tech', 'MechanicalKeyboards', 'Focus', 'AnalogueTools'],
     views: 4099,
     readingTime: '6 min read',
-    seoTitle: 'Sensory Haptics: The Mechanical Keyboards Revival | Vellum & Vector',
+    seoTitle: 'Sensory Haptics: The Mechanical Keyboards Revival | LLM Review Pro',
     seoDescription: 'Find out why mechanical typing and static journaling are trending upwards inside modern deep focus engineering labs.',
     createdAt: '2025-04-02T14:00:00Z'
   },
@@ -349,7 +349,7 @@ print(f"Applied spacing: {spacing}px")</code></pre>
     tags: ['Photography', 'Architecture', 'NegativeSpace', 'Minimalism'],
     views: 3712,
     readingTime: '8 min read',
-    seoTitle: 'Architectural Framing and Negative Space | Vellum & Vector',
+    seoTitle: 'Architectural Framing and Negative Space | LLM Review Pro',
     seoDescription: 'Master negative space compositions inside modern architectural spaces with flat perspectives and minimal frame weight.',
     createdAt: '2025-05-16T10:00:00Z'
   }

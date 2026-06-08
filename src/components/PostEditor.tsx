@@ -3,7 +3,7 @@ import {
   ArrowLeft, Save, Globe, Heading, Code, Quote, Sparkles, 
   CheckCircle2, ShieldAlert, GripVertical, Trash2, Plus, 
   Copy, ChevronUp, ChevronDown, Youtube, BookOpen, AlertCircle, Laptop,
-  Image, UploadCloud
+  Image, UploadCloud, Table
 } from 'lucide-react';
 import { Article } from '../types';
 
@@ -12,11 +12,12 @@ interface PostEditorProps {
   allArticles: Article[];
   onBack: () => void;
   onSave: (articleData: Partial<Article>) => void;
+  isLoading?: boolean;
 }
 
 interface Block {
   id: string;
-  type: 'heading' | 'paragraph' | 'code' | 'quote' | 'youtube' | 'image';
+  type: 'heading' | 'paragraph' | 'code' | 'quote' | 'youtube' | 'image' | 'table';
   value: string;
   meta?: {
     filename?: string;
@@ -114,6 +115,56 @@ const parseHTMLToBlocks = (html: string): Block[] => {
         return;
       }
 
+      // 4.5. Table Content Parser
+      if (el.tagName === 'TABLE' || el.querySelector('table') || (el.className && el.className.includes('overflow') && el.querySelector('table'))) {
+        const table = el.tagName === 'TABLE' ? el : el.querySelector('table')!;
+        const headers: string[] = [];
+        const rows: string[][] = [];
+        
+        table.querySelectorAll('thead th, thead td').forEach((cell) => {
+          headers.push(cell.textContent || '');
+        });
+        
+        table.querySelectorAll('tbody tr').forEach((tr) => {
+          const row: string[] = [];
+          tr.querySelectorAll('td, th').forEach((cell) => {
+            row.push(cell.textContent || '');
+          });
+          if (row.length > 0) {
+            rows.push(row);
+          }
+        });
+        
+        if (headers.length === 0) {
+          const firstRow = table.querySelector('tr');
+          if (firstRow) {
+            firstRow.querySelectorAll('th, td').forEach((cell) => {
+              headers.push(cell.textContent || '');
+            });
+            table.querySelectorAll('tr').forEach((tr, index) => {
+              if (index === 0) return;
+              const row: string[] = [];
+              tr.querySelectorAll('td, th').forEach((cell) => {
+                row.push(cell.textContent || '');
+              });
+              if (row.length > 0) {
+                rows.push(row);
+              }
+            });
+          }
+        }
+
+        blocks.push({
+          id: Math.random().toString(),
+          type: 'table',
+          value: JSON.stringify({ 
+            headers: headers.length > 0 ? headers : ['Feature', 'Specification', 'Details'], 
+            rows: rows.length > 0 ? rows : [['Value 1', 'Value 2', 'Value 3']] 
+          })
+        });
+        return;
+      }
+
       // 5. Standard Editorial paragraph
       blocks.push({
         id: Math.random().toString(),
@@ -176,6 +227,20 @@ const serializeBlocksToHTML = (blocks: Block[]): string => {
   <iframe class="absolute top-0 left-0 w-full h-full" src="${embedUrl}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerPolicy="no-referrer"></iframe>
 </div>`;
       }
+      if (b.type === 'table') {
+        try {
+          const data = JSON.parse(b.value || '{"headers":[],"rows":[]}');
+          const headersHTML = data.headers.map((h: string) => `<th class="px-4 py-3 bg-cream-dark/40 font-serif font-bold text-[#141414] border-b border-cream-dark">${h}</th>`).join('');
+          const rowsHTML = data.rows.map((row: string[]) => {
+            const cellsHTML = row.map((cell: string) => `<td class="px-4 py-3 border-b border-cream-dark/40">${cell}</td>`).join('');
+            return `<tr class="hover:bg-cream-paper/30 transition-colors">${cellsHTML}</tr>`;
+          }).join('');
+          
+          return `<div class="my-8 overflow-x-auto border border-cream-dark/60 rounded-xl shadow-sm"><table class="min-w-full divide-y divide-cream-dark/60 text-left font-sans text-xs bg-white"><thead><tr>${headersHTML}</tr></thead><tbody class="divide-y divide-cream-dark/30">${rowsHTML}</tbody></table></div>`;
+        } catch (e) {
+          return `<div class="my-8 overflow-x-auto border border-cream-dark/60 rounded-xl shadow-sm"><table class="min-w-full divide-y divide-cream-dark/60 text-left font-sans text-xs bg-white">${b.value}</table></div>`;
+        }
+      }
       // Default Editorial Paragraph and content blocks
       return `<p class="mb-6 font-body-lg text-body-lg">${sanitizedValue}</p>`;
     })
@@ -202,7 +267,8 @@ export const PostEditor: React.FC<PostEditorProps> = ({
   articleId,
   allArticles,
   onBack,
-  onSave
+  onSave,
+  isLoading = false
 }) => {
   const isEditMode = !!articleId;
   const existingArticle = allArticles.find(a => a.id === articleId);
@@ -346,8 +412,8 @@ export const PostEditor: React.FC<PostEditorProps> = ({
     }
   };
 
-  // Fallback / standard operations buttons trigger for blocks
-  const appendBlockFromSidebar = (type: 'heading' | 'paragraph' | 'code' | 'quote' | 'youtube' | 'image') => {
+  // Fallback / standard operations operations trigger for blocks
+  const appendBlockFromSidebar = (type: 'heading' | 'paragraph' | 'code' | 'quote' | 'youtube' | 'image' | 'table') => {
     let defaultValue = '';
     const meta: { filename?: string } = {};
 
@@ -362,6 +428,16 @@ export const PostEditor: React.FC<PostEditorProps> = ({
     if (type === 'image') {
       defaultValue = '';
       meta.filename = '';
+    }
+    if (type === 'table') {
+      defaultValue = JSON.stringify({ 
+        headers: ['Feature', 'Specification', 'Details'], 
+        rows: [
+          ['Rendering Engine', 'Isomorphic React', 'Super-fast load speeds'],
+          ['Responsive Frame', 'Tailwind CSS Grid', 'Fluid adaptive spacing'],
+          ['Static Outlines', 'SEO Canonical Tags', 'Maximum Google rank Index']
+        ] 
+      });
     }
 
     const newBlock: Block = {
@@ -471,7 +547,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
       tags: tags.length > 0 ? tags : ['Editorial'],
       status,
       readingTime: `${readingTimeValue} min read`,
-      seoTitle: `${title} | Vellum & Vector`,
+      seoTitle: `${title} | LLM Review Pro`,
       seoDescription: summary
     });
   };
@@ -479,6 +555,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
   const PRESET_TOOLS = [
     { type: 'heading', title: 'Section Heading', desc: 'Add structured H2 subtitle', icon: Heading },
     { type: 'paragraph', title: 'Paragraph Block', desc: 'Write long-form text bodies', icon: BookOpen },
+    { type: 'table', title: 'Data Table', desc: 'Insert beautiful tabular data grids', icon: Table },
     { type: 'image', title: 'Graphic Image', desc: 'Drag-and-drop or select file', icon: Image },
     { type: 'code', title: 'Syntax Code Block', desc: 'Embed programming snippets', icon: Code },
     { type: 'quote', title: 'Highlight Quote', desc: 'Push beautiful serif quotes', icon: Quote },
@@ -824,6 +901,146 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                           </div>
                         )}
 
+                        {block.type === 'table' && (
+                          <div className="space-y-4 bg-cream-paper/70 p-4 border border-cream-dark/50 rounded-xl">
+                            {(() => {
+                              let tableData = { headers: ['Header 1', 'Header 2'], rows: [['Cell A1', 'Cell A2']] };
+                              try {
+                                if (block.value) {
+                                  tableData = JSON.parse(block.value);
+                                }
+                              } catch (e) {}
+
+                              const updateTable = (newData: typeof tableData) => {
+                                updateBlockValue(block.id, JSON.stringify(newData));
+                              };
+
+                              const handleHeaderChange = (colIdx: number, val: string) => {
+                                const headers = [...tableData.headers];
+                                headers[colIdx] = val;
+                                updateTable({ ...tableData, headers });
+                              };
+
+                              const handleCellChange = (rowIdx: number, colIdx: number, val: string) => {
+                                const rows = tableData.rows.map((row, rI) => 
+                                  rI === rowIdx ? row.map((cell, cI) => cI === colIdx ? val : cell) : row
+                                );
+                                updateTable({ ...tableData, rows });
+                              };
+
+                              const addColumn = () => {
+                                const headers = [...tableData.headers, `Header ${tableData.headers.length + 1}`];
+                                const rows = tableData.rows.map(row => [...row, '']);
+                                updateTable({ headers, rows });
+                              };
+
+                              const removeColumn = (colIdx: number) => {
+                                if (tableData.headers.length <= 1) return;
+                                const headers = tableData.headers.filter((_, i) => i !== colIdx);
+                                const rows = tableData.rows.map(row => row.filter((_, i) => i !== colIdx));
+                                updateTable({ headers, rows });
+                              };
+
+                              const addRow = () => {
+                                const rows = [...tableData.rows, Array(tableData.headers.length).fill('')];
+                                updateTable({ ...tableData, rows });
+                              };
+
+                              const removeRow = (rowIdx: number) => {
+                                if (tableData.rows.length <= 1) return;
+                                const rows = tableData.rows.filter((_, i) => i !== rowIdx);
+                                updateTable({ ...tableData, rows });
+                              };
+
+                              return (
+                                <div className="space-y-3 font-sans">
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-xs font-serif font-bold text-charcoal-intense">Editorial Data Table Builder</span>
+                                    <div className="flex gap-2">
+                                      <button
+                                        type="button"
+                                        onClick={addColumn}
+                                        className="px-2.5 py-1 bg-white hover:bg-cream-dark text-[10px] sm:text-xs font-semibold border border-cream-dark/85 rounded flex items-center gap-1 transition-colors"
+                                      >
+                                        <Plus className="w-3.5 h-3.5 text-brass-accent" />
+                                        <span>Add Column</span>
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={addRow}
+                                        className="px-2.5 py-1 bg-charcoal-intense hover:bg-charcoal-soft text-cream-base text-[10px] sm:text-xs font-semibold rounded flex items-center gap-1 transition-colors animate-fade-in"
+                                      >
+                                        <Plus className="w-3.5 h-3.5 text-brass-light" />
+                                        <span>Add Row</span>
+                                      </button>
+                                    </div>
+                                  </div>
+
+                                  <div className="overflow-x-auto border border-cream-dark/60 rounded-xl shadow-sm bg-white">
+                                    <table className="min-w-full divide-y divide-cream-dark/60 text-left font-sans text-xs">
+                                      <thead>
+                                        <tr className="bg-cream-paper/40">
+                                          {tableData.headers.map((header, colIdx) => (
+                                            <th key={colIdx} className="p-2 border-b border-cream-dark/60 min-w-[120px]">
+                                              <div className="flex items-center gap-1">
+                                                <input
+                                                  type="text"
+                                                  value={header}
+                                                  onChange={(e) => handleHeaderChange(colIdx, e.target.value)}
+                                                  className="w-full bg-transparent border-b border-cream-dark/40 focus:border-brass-accent focus:outline-none font-bold text-charcoal-intense py-0.5"
+                                                />
+                                                {tableData.headers.length > 1 && (
+                                                  <button
+                                                    type="button"
+                                                    onClick={() => removeColumn(colIdx)}
+                                                    className="p-1 hover:text-red-600 rounded text-gray-400 font-bold transition-colors"
+                                                    title="Delete Column"
+                                                  >
+                                                    ×
+                                                  </button>
+                                                )}
+                                              </div>
+                                            </th>
+                                          ))}
+                                          <th className="p-2 border-b border-cream-dark/60 w-10"></th>
+                                        </tr>
+                                      </thead>
+                                      <tbody className="divide-y divide-cream-dark/20">
+                                        {tableData.rows.map((row, rowIdx) => (
+                                          <tr key={rowIdx}>
+                                            {row.map((cell, colIdx) => (
+                                              <td key={colIdx} className="p-2 min-w-[120px]">
+                                                <input
+                                                  type="text"
+                                                  value={cell}
+                                                  onChange={(e) => handleCellChange(rowIdx, colIdx, e.target.value)}
+                                                  className="w-full bg-cream-base/10 rounded border border-transparent hover:border-cream-dark/30 focus:border-brass-accent focus:outline-none p-1 font-mono text-xs text-charcoal-soft"
+                                                />
+                                              </td>
+                                            ))}
+                                            <td className="p-2 text-center w-10">
+                                              {tableData.rows.length > 1 && (
+                                                <button
+                                                  type="button"
+                                                  onClick={() => removeRow(rowIdx)}
+                                                  className="p-1 text-gray-400 hover:text-red-600 rounded font-semibold transition-colors"
+                                                  title="Delete Row"
+                                                >
+                                                  <Trash2 className="w-3.5 h-3.5" />
+                                                </button>
+                                              )}
+                                            </td>
+                                          </tr>
+                                        ))}
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                </div>
+                              );
+                            })()}
+                          </div>
+                        )}
+
                         {block.type === 'image' && (
                           <div className="space-y-4">
                             {block.value ? (
@@ -1058,16 +1275,18 @@ export const PostEditor: React.FC<PostEditorProps> = ({
             <div className="pt-4 border-t border-cream-dark/60 space-y-2">
               <button
                 type="submit"
-                className="w-full py-3 bg-charcoal-intense hover:bg-charcoal-soft text-cream-base rounded-xl text-xs font-bold uppercase transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                disabled={isLoading}
+                className={`w-full py-3 bg-charcoal-intense hover:bg-charcoal-soft text-cream-base rounded-xl text-xs font-bold uppercase transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer ${isLoading ? 'opacity-50 cursor-not-allowed font-medium' : ''}`}
               >
                 <Save className="w-4 h-4 text-brass-light" />
-                <span>Save Manuscript</span>
+                <span>{isLoading ? 'Saving Manuscript...' : 'Save Manuscript'}</span>
               </button>
               
               <button
                 type="button"
                 onClick={onBack}
-                className="w-full py-2.5 bg-white hover:bg-cream-dark border border-cream-dark text-charcoal-soft rounded-lg text-xs font-semibold cursor-pointer transition-colors"
+                disabled={isLoading}
+                className="w-full py-2.5 bg-white hover:bg-cream-dark border border-cream-dark text-charcoal-soft rounded-lg text-xs font-semibold cursor-pointer transition-colors disabled:opacity-50"
               >
                 Discard Changes
               </button>
@@ -1099,10 +1318,10 @@ export const PostEditor: React.FC<PostEditorProps> = ({
               
               <div className="bg-white border border-cream-dark rounded-xl p-4 space-y-1.5 font-sans leading-relaxed shadow-sm">
                 <p className="text-sm font-medium text-blue-800 hover:underline cursor-pointer line-clamp-1 font-serif">
-                  {title ? `${title} | Vellum & Vector` : 'A Beautiful Manuscript Title | Vellum & Vector'}
+                  {title ? `${title} | LLM Review Pro` : 'A Beautiful Manuscript Title | LLM Review Pro'}
                 </p>
                 <p className="text-[11px] text-emerald-800 truncate font-mono">
-                  https://vellumvector.com/{category.toLowerCase()}/{generatedSlug}
+                  https://llmreviewpro.com/{category.toLowerCase()}/{generatedSlug}
                 </p>
                 <p className="text-xs text-[#5c5a52] line-clamp-3">
                   {summary || 'No excerpt written. Draft a catchy listing summary card excerpt in the left configuration box to dynamically see listings metadata snippet simulator.'}

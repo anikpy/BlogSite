@@ -241,8 +241,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </nav>
 
           <div className="pt-6 border-t border-cream-dark/60 font-sans text-[11px] text-[#7c7a72] leading-relaxed">
-            <p className="font-semibold text-charcoal-intense">Vellum & Vector CMS v4.0</p>
-            <p className="mt-1">Relational state synced to fallback JSON server mimicking safe Django database structures.</p>
+            <p className="font-semibold text-charcoal-intense">LLM Review Pro CMS v4.0</p>
+            <p className="mt-1">Relational state synced to fallback JSON server mimicking safe database structures.</p>
           </div>
         </div>
       </div>

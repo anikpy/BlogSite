@@ -279,6 +279,7 @@ export default function App() {
             allArticles={articles}
             onBack={() => handleNavigate('dashboard')}
             onSave={handleSaveArticle}
+            isLoading={isLoading}
           />
         )}
 

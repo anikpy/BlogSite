@@ -87,10 +87,10 @@ export const InfoPages: React.FC<InfoPagesProps> = ({ pageType, onNavigate }) =>
                 Established 2026
               </span>
               <h1 className="font-serif text-4xl font-extrabold text-charcoal-intense mt-2">
-                About Vellum & Vector
+                About LLM Review Pro
               </h1>
               <p className="text-sm text-charcoal-soft mt-1 font-sans">
-                A modern sandbox for thoughtful technical critiques, literary engineering, and minimal styling.
+                A modern sandbox for thoughtful LLM critiques, AI assessments, and minimal styling.
               </p>
             </header>
 
@@ -99,7 +99,7 @@ export const InfoPages: React.FC<InfoPagesProps> = ({ pageType, onNavigate }) =>
                 "We believe interfaces are written conversations. When reading high-fidelity explanations about hardware, algorithms, or traveling, your attention deserves protection from noisy layouts."
               </p>
               <p>
-                <strong>Vellum & Vector</strong> has emerged as a dedicated editorial publication focusing on advanced technology, modern programming paradigms, artificial intelligence breakthroughs, and deep-focus sabbaticals. Our team of experienced developers, architects, and essayists aim to deliver clear, precise, and structurally elegant narratives.
+                <strong>LLM Review Pro</strong> has emerged as a dedicated editorial publication focusing on advanced technology, modern programming paradigms, artificial intelligence breakthroughs, and deep-focus sabbaticals. Our team of experienced developers, architects, and essayists aim to deliver clear, precise, and structurally elegant narratives.
               </p>
               <p>
                 Unlike generic news aggregators, we invest heavily in custom design and custom code rendering. Our platform does not employ distracting overlays, click-bait formatting, or low-quality summaries. Every single artifact is crafted to provide native value to builders and creative minds globally.
@@ -137,12 +137,12 @@ export const InfoPages: React.FC<InfoPagesProps> = ({ pageType, onNavigate }) =>
 
             <section className="space-y-6 text-charcoal-soft leading-relaxed text-sm">
               <p>
-                At Vellum & Vector, accessible from our public web portal, the privacy of our visitors is one of our primary priorities. This Privacy Policy document contains types of information that is collected and recorded by our platform and how we use it securely.
+                At LLM Review Pro, accessible from our public web portal, the privacy of our visitors is one of our primary priorities. This Privacy Policy document contains types of information that is collected and recorded by our platform and how we use it securely.
               </p>
 
               <h3 className="font-serif text-xl font-bold text-charcoal-intense pt-2">1. Log Files & Metadata</h3>
               <p>
-                Vellum & Vector follows a standard procedure of using server log files. These files log visitors when they visit websites. All hosting companies do this as part of hosting services' analytics. The information collected by log files includes internet protocol (IP) addresses, browser type, Internet Service Provider (ISP), date and time stamp, referring/exit pages, and optionally the number of clicks. These are not linked to any personally identifiable information.
+                LLM Review Pro follows a standard procedure of using server log files. These files log visitors when they visit websites. All hosting companies do this as part of hosting services' analytics. The information collected by log files includes internet protocol (IP) addresses, browser type, Internet Service Provider (ISP), date and time stamp, referring/exit pages, and optionally the number of clicks. These are not linked to any personally identifiable information.
               </p>
 
               <h3 className="font-serif text-xl font-bold text-charcoal-intense pt-2">2. Google DoubleClick DART Cookies & AdSense</h3>
@@ -152,10 +152,10 @@ export const InfoPages: React.FC<InfoPagesProps> = ({ pageType, onNavigate }) =>
 
               <h3 className="font-serif text-xl font-bold text-charcoal-intense pt-2">3. Advertising Partners Privacy Policies</h3>
               <p>
-                Third-party ad servers or ad networks use technologies like cookies, JavaScript, or Web Beacons that are used in their respective advertisements and links that appear on Vellum & Vector, which are sent directly to users' browsers. They automatically receive your IP address when this occurs. These technologies are used to measure the effectiveness of their advertising campaigns and/or to personalize the advertising content that you see on websites that you visit.
+                Third-party ad servers or ad networks use technologies like cookies, JavaScript, or Web Beacons that are used in their respective advertisements and links that appear on LLM Review Pro, which are sent directly to users' browsers. They automatically receive your IP address when this occurs. These technologies are used to measure the effectiveness of their advertising campaigns and/or to personalize the advertising content that you see on websites that you visit.
               </p>
               <p className="italic text-xs bg-cream-base/10 border-l-2 border-brass-accent p-3">
-                Note that Vellum & Vector has no access to or control over these cookies used by third-party advertisers. We strictly encourage reading the respective Privacy Policies of these third-party ad servers for more detailed information.
+                Note that LLM Review Pro has no access to or control over these cookies used by third-party advertisers. We strictly encourage reading the respective Privacy Policies of these third-party ad servers for more detailed information.
               </p>
 
               <h3 className="font-serif text-xl font-bold text-charcoal-intense pt-2">4. User Rights (GDPR & CCPA Compliant)</h3>
@@ -188,23 +188,23 @@ export const InfoPages: React.FC<InfoPagesProps> = ({ pageType, onNavigate }) =>
 
             <section className="space-y-6 text-charcoal-soft leading-relaxed text-sm">
               <p>
-                By accessing this platform, we assume you accept these terms of service in full. Do not continue to use Vellum & Vector if you do not agree to take all of the rules and conditions stated on this page.
+                By accessing this platform, we assume you accept these terms of service in full. Do not continue to use LLM Review Pro if you do not agree to take all of the rules and conditions stated on this page.
               </p>
 
               <h3 className="font-serif text-xl font-bold text-charcoal-intense pt-2">1. Intellectual Property License</h3>
               <p>
-                Unless otherwise stated, Vellum & Vector and/or its licensors own the intellectual property rights for all material published under our domains. All intellectual property rights are reserved. You may view and print pages for your own personal use subject to restrictions set in these terms of service.
+                Unless otherwise stated, LLM Review Pro and/or its licensors own the intellectual property rights for all material published under our domains. All intellectual property rights are reserved. You may view and print pages for your own personal use subject to restrictions set in these terms of service.
               </p>
               <p>You must not: </p>
               <ul className="list-disc pl-5 space-y-2 text-xs font-sans">
-                <li>Republish technical prose or visual illustrations from Vellum & Vector without precise citation.</li>
+                <li>Republish technical prose or visual illustrations from LLM Review Pro without precise citation.</li>
                 <li>Sell, rent, or sub-license technical content published with our copyright indicators.</li>
                 <li>Reproduce, duplicate, or copy code scripts without attribution to the active authors.</li>
               </ul>
 
               <h3 className="font-serif text-xl font-bold text-charcoal-intense pt-2">2. User Comments & Contributions</h3>
               <p>
-                Certain parts of this platform may offer opportunities for authorized authors to publish manuscripts or comments. Vellum & Vector does not filter, edit, or publish comments prior to their presence on the website. Comments do not reflect the views and opinions of Vellum & Vector, its agents or affiliates. Comments reflect the view and opinion of the person who posts their thoughts.
+                Certain parts of this platform may offer opportunities for authorized authors to publish manuscripts or comments. LLM Review Pro does not filter, edit, or publish comments prior to their presence on the website. Comments do not reflect the views and opinions of LLM Review Pro, its agents or affiliates. Comments reflect the view and opinion of the person who posts their thoughts.
               </p>
             </section>
           </article>

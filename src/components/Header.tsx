@@ -35,10 +35,10 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
             <div>
               <span className="font-serif text-xl font-bold tracking-tight text-charcoal-intense group-hover:text-brass-accent transition-colors">
-                Vellum & Vector
+                LLM Review Pro
               </span>
               <p className="font-sans text-[10px] tracking-widest text-[#7c7a72] uppercase font-medium">
-                Editorial Platform
+                Expert Evaluations
               </p>
             </div>
           </a>
@@ -82,15 +82,10 @@ export const Header: React.FC<HeaderProps> = ({
                 {/* CMS Avatar Access trigger */}
                 <div 
                   onClick={() => onNavigate('dashboard')}
-                  className="w-10 h-10 rounded-full overflow-hidden border border-cream-dark hover:border-brass-accent cursor-pointer transition-colors hidden sm:block"
-                  title="Aida System Admin Profile"
+                  className="w-10 h-10 rounded-full flex items-center justify-center bg-brass-accent text-cream-base border border-cream-dark hover:border-charcoal-intense cursor-style cursor-pointer font-sans text-sm font-bold transition-colors hidden sm:flex"
+                  title="Administrator Profile"
                 >
-                  <img 
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5vTgbsr1E8Hhy4Y-JjHUZfuVLzXs5nqz51rwxSXGwSn0Z_w-lwx6mY7BRE0kJ8stMNUsoEm616tggpFxo-lGs9kyZhfYlRahxysK0tEVrhkm_6XFO1_NPP5NX_NTDeS5SSCgS4oZ2NDJXw10D0o_aCYUSbV4PdAEdMOCtZulbggSlMUQ-Sk12p4p-TJ8CUSNBkNZRq2srjgHvnggNnjig4JMj8pGNIh58FtOhe-tRfJSyEmuxZlIej-kTDMFuOzUvdXaGleArmuM7" 
-                    alt="System Administrator" 
-                    className="w-full h-full object-cover"
-                    referrerPolicy="no-referrer"
-                  />
+                  {localStorage.getItem('vellum_admin_email')?.[0]?.toUpperCase() || 'A'}
                 </div>
 
                 {/* Logout Action */}
@@ -105,22 +100,7 @@ export const Header: React.FC<HeaderProps> = ({
                   <span className="hidden md:inline">Logout</span>
                 </button>
               </>
-            ) : (
-              /* If not logged in, only show a very elegant clean Admin Login button */
-              <button
-                type="button"
-                onClick={() => onNavigate('login')}
-                className={`flex items-center gap-2 px-3 py-2 border ${
-                  currentView === 'login' 
-                    ? 'border-brass-accent text-brass-accent bg-cream-paper' 
-                    : 'border-cream-dark/80 text-[#7c7a72] hover:text-charcoal-intense hover:border-cream-dark bg-cream-paper/70'
-                } rounded-lg text-xs font-semibold uppercase tracking-wider transition-all duration-200 cursor-pointer`}
-                id="admin-login-trigger"
-              >
-                <Lock className="w-3.5 h-3.5" />
-                <span>Admin Login</span>
-              </button>
-            )}
+            ) : null}
 
           </div>
         </div>

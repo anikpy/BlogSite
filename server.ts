@@ -72,6 +72,10 @@ function initDB() {
         timestamp TEXT NOT NULL,
         dayOfWeek TEXT NOT NULL
       );
+
+      CREATE INDEX IF NOT EXISTS idx_articles_status ON articles(status);
+      CREATE INDEX IF NOT EXISTS idx_page_visits_path ON page_visits(path);
+      CREATE INDEX IF NOT EXISTS idx_page_visits_timestamp ON page_visits(timestamp);
     `);
 
     // Bootstrap Dynamic page visits if empty
@@ -170,7 +174,7 @@ function initDB() {
           tags: ['AI', 'DeepSeek', 'MoE', 'MachineLearning'],
           views: 1845,
           readingTime: '7 min read',
-          seoTitle: 'DeepSeek-V3 & R1 MoE Architecture Analysis | Vellum & Vector',
+          seoTitle: 'DeepSeek-V3 & R1 MoE Architecture Analysis | LLM Review Pro',
           seoDescription: 'Uncover the deep math behind MLA compression, hardware routing rules, and the reinforcement learning structure of DeepSeek models.',
           createdAt: '2026-06-07T08:00:00Z'
         },
@@ -235,7 +239,7 @@ func EvalTreeReasoning(prompt string) string {
           tags: ['AI', 'OpenAI', 'GPT', 'ReasoningModels'],
           views: 985,
           readingTime: '6 min read',
-          seoTitle: 'Inside OpenAI o1 & o3-mini Systems | Vellum & Vector',
+          seoTitle: 'Inside OpenAI o1 & o3-mini Systems | LLM Review Pro',
           seoDescription: 'Unpack the technical mechanics of inference-time scaling, hidden chains of thought, and reinforced learning parameters.',
           createdAt: '2026-06-06T09:00:00Z'
         },
@@ -289,7 +293,7 @@ func EvalTreeReasoning(prompt string) string {
           tags: ['AI', 'Claude', 'Anthropic', 'AgenticAI'],
           views: 1230,
           readingTime: '5 min read',
-          seoTitle: 'Claude 3.5 Sonnet Design & Logic | Vellum & Vector',
+          seoTitle: 'Claude 3.5 Sonnet Design & Logic | LLM Review Pro',
           seoDescription: 'Master the principles of Artifact generation, advanced XML prompt containment, and clean coding with Claude.',
           createdAt: '2026-06-05T12:00:00Z'
         },
@@ -346,7 +350,7 @@ func EvalTreeReasoning(prompt string) string {
           tags: ['AI', 'Stepfun', 'Multimodal', 'LargeLanguageModels'],
           views: 754,
           readingTime: '5 min read',
-          seoTitle: 'Stepfun Trillion-Parameter MoE Architecture | Vellum & Vector',
+          seoTitle: 'Stepfun Trillion-Parameter MoE Architecture | LLM Review Pro',
           seoDescription: 'Explore Stepfun\'s innovative Mixture of Experts gating pathways, long context sequences, and multi-modal manifolds.',
           createdAt: '2026-06-04T15:00:00Z'
         }
@@ -403,6 +407,42 @@ app.post('/api/login', (req, res) => {
 });
 
 // Helper validation middleware for Admin-only interactions
+interface CacheEntry<T> {
+  data: T;
+  expiresAt: number;
+}
+
+class MemoryCacheManager {
+  private cache = new Map<string, CacheEntry<any>>();
+
+  set<T>(key: string, data: T, ttlMs: number): void {
+    this.cache.set(key, {
+      data,
+      expiresAt: Date.now() + ttlMs,
+    });
+  }
+
+  get<T>(key: string): T | null {
+    const entry = this.cache.get(key);
+    if (!entry) return null;
+    if (Date.now() > entry.expiresAt) {
+      this.cache.delete(key);
+      return null;
+    }
+    return entry.data;
+  }
+
+  delete(key: string): void {
+    this.cache.delete(key);
+  }
+
+  clear(): void {
+    this.cache.clear();
+  }
+}
+
+const apiCache = new MemoryCacheManager();
+
 const requireAdminAuth = (req: any, res: any, next: any) => {
   const authHeader = req.headers.authorization;
   if (!authHeader || authHeader !== 'Bearer vellum_vector_admin_token_2026') {
@@ -414,9 +454,14 @@ const requireAdminAuth = (req: any, res: any, next: any) => {
 // 1. GET all articles from SQLite
 app.get('/api/articles', (req, res) => {
   try {
-    const database = initDB();
     const { category, status } = req.query;
+    const cacheKey = `articles_list_cat_${category || 'all'}_status_${status || 'all'}`;
+    const cachedData = apiCache.get<Article[]>(cacheKey);
+    if (cachedData) {
+      return res.json(cachedData);
+    }
 
+    const database = initDB();
     const stmt = database.prepare("SELECT * FROM articles ORDER BY createdAt DESC");
     const rows = stmt.all() as any[];
 
@@ -440,6 +485,8 @@ app.get('/api/articles', (req, res) => {
       );
     }
 
+    // Cache the listing for 1 minute (60000ms), cleared instantly on admin updates
+    apiCache.set(cacheKey, articlesList, 60000);
     res.json(articlesList);
   } catch (err) {
     console.error("SQL Retrieval Error:", err);
@@ -450,9 +497,35 @@ app.get('/api/articles', (req, res) => {
 // 2. GET single article by slug from SQLite (Increments view stat dynamically!)
 app.get('/api/articles/:slug', (req, res) => {
   try {
-    const database = initDB();
     const slug = req.params.slug;
+    const cacheKey = `article_slug_${slug}`;
+    const cachedData = apiCache.get<Article>(cacheKey);
+    
+    if (cachedData) {
+      // Async views increment so client page load has exactly 0ms DB block!
+      setImmediate(() => {
+        try {
+          const dbAsync = initDB();
+          dbAsync.prepare("UPDATE articles SET views = views + 1 WHERE slug = ?").run(slug);
+          
+          const statsRow = dbAsync.prepare("SELECT value FROM stats WHERE key = 'visitorStats'").get() as { value: string } | undefined;
+          if (statsRow) {
+            const statsObj = JSON.parse(statsRow.value);
+            statsObj.pageViews += 1;
+            if (Math.random() > 0.7) {
+              statsObj.uniqueVisitors += 1;
+              statsObj.totalVisitors += 1;
+            }
+            dbAsync.prepare("UPDATE stats SET value = ? WHERE key = 'visitorStats'").run(JSON.stringify(statsObj));
+          }
+        } catch (e) {
+          console.error("Background view increment failed:", e);
+        }
+      });
+      return res.json(cachedData);
+    }
 
+    const database = initDB();
     const selectStmt = database.prepare("SELECT * FROM articles WHERE slug = ?");
     const row = selectStmt.get(slug) as any;
 
@@ -482,6 +555,8 @@ app.get('/api/articles/:slug', (req, res) => {
       tags: JSON.parse(row.tags || '[]')
     };
 
+    // Cache the single article for 30 seconds to absorb concurrent client surges
+    apiCache.set(cacheKey, updatedRow, 30000);
     res.json(updatedRow);
   } catch (err) {
     console.error("SQL Error in Slug retrieval:", err);
@@ -509,11 +584,17 @@ app.post('/api/articles', requireAdminAuth, (req, res) => {
 
     const slug = titleSlug || 'untitled-post';
 
-    // Check if article with this slug already exists to update
-    const existing = database.prepare("SELECT id, views, createdAt FROM articles WHERE slug = ?").get(slug) as { id: string; views: number; createdAt: string } | undefined;
+    // Check if article with this id or slug already exists to update
+    let existing: { id: string; views: number; createdAt: string; slug: string } | undefined;
+    if (newArticle.id) {
+      existing = database.prepare("SELECT id, views, createdAt, slug FROM articles WHERE id = ?").get(newArticle.id) as any;
+    }
+    if (!existing) {
+      existing = database.prepare("SELECT id, views, createdAt, slug FROM articles WHERE slug = ?").get(slug) as any;
+    }
 
     const article: Article = {
-      id: existing ? existing.id : Date.now().toString(),
+      id: existing ? existing.id : (newArticle.id || Date.now().toString()),
       title: newArticle.title,
       slug: slug,
       category: newArticle.category || 'Tech',
@@ -521,7 +602,7 @@ app.post('/api/articles', requireAdminAuth, (req, res) => {
       content: newArticle.content,
       author: newArticle.author || 'Anik Admin',
       authorRole: newArticle.authorRole || 'System Administrator',
-      authorAvatar: newArticle.authorAvatar || 'https://lh3.googleusercontent.com/aida-public/AB6AXuD5vTgbsr1E8Hhy4Y-JjHUZfuVLzXs5nqz51rwxSXGwSn0Z_w-lwx6mY7BRE0kJ8stMNUsoEm616tggpFxo-lGs9kyZhfYlRahxysK0tEVrhkm_6XFO1_NPP5NX_NTDeS5SSCgS4oZ2NDJXw10D0o_aCYUSbV4PdAEdMOCtZulbggSlMUQ-Sk12p4p-TJ8CUSNBkNZRq2srjgHvnggNnjig4JMj8pGNIh58FtOhe-tRfJSyEmuxZlIej-kTDMFuOzUvdXaGleArmuM7',
+      authorAvatar: newArticle.authorAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop',
       publishedDate: newArticle.publishedDate || new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
       status: (newArticle.status as 'Draft' | 'Published') || 'Draft',
       isFeatured: newArticle.isFeatured || false,
@@ -529,7 +610,7 @@ app.post('/api/articles', requireAdminAuth, (req, res) => {
       tags: newArticle.tags || ['General'],
       views: existing ? existing.views : 0,
       readingTime: newArticle.readingTime || '5 min read',
-      seoTitle: newArticle.seoTitle || `${newArticle.title} | Vellum & Vector`,
+      seoTitle: newArticle.seoTitle || `${newArticle.title} | LLM Review Pro`,
       seoDescription: newArticle.seoDescription || newArticle.summary || '',
       createdAt: existing ? existing.createdAt : new Date().toISOString()
     };
@@ -557,8 +638,9 @@ app.post('/api/articles', requireAdminAuth, (req, res) => {
           tags = ?,
           readingTime = ?,
           seoTitle = ?,
-          seoDescription = ?
-        WHERE slug = ?
+          seoDescription = ?,
+          slug = ?
+        WHERE id = ?
       `).run(
         article.title,
         article.category,
@@ -575,7 +657,8 @@ app.post('/api/articles', requireAdminAuth, (req, res) => {
         article.readingTime,
         article.seoTitle,
         article.seoDescription,
-        slug
+        slug,
+        existing.id
       );
     } else {
       // Insert
@@ -608,6 +691,9 @@ app.post('/api/articles', requireAdminAuth, (req, res) => {
       );
     }
 
+    // Clear relevant caches instantly
+    apiCache.clear();
+
     res.json(article);
   } catch (err) {
     console.error("SQL Error in Slug writing/updating:", err);
@@ -629,6 +715,9 @@ app.delete('/api/articles/:id', requireAdminAuth, (req, res) => {
 
     // Delete
     database.prepare("DELETE FROM articles WHERE id = ?").run(id);
+
+    // Clear caches instantly on deletion
+    apiCache.clear();
 
     res.json({ success: true, message: 'Article safely deleted.' });
   } catch (err) {
@@ -835,13 +924,21 @@ Sitemap: ${baseUrl}/sitemap.xml
 
 // 11. Dynamic ads.txt for high compliance with Google AdSense crawler
 app.get('/ads.txt', (req, res) => {
+  const pubId = process.env.ADSENSE_PUB_ID || 'pub-xxxxxxxxxxxxxxxx';
   res.type('text/plain');
-  res.send('google.com, pub-xxxxxxxxxxxxxxxx, DIRECT, f08c47fec0942fa0');
+  res.send(`google.com, ${pubId}, DIRECT, f08c47fec0942fa0\n`);
 });
 
 // 12. Dynamic sitemap.xml for SEO indexing optimization
 app.get('/sitemap.xml', (req, res) => {
   try {
+    const cacheKey = 'dynamic_sitemap_xml';
+    const cachedSitemap = apiCache.get<string>(cacheKey);
+    if (cachedSitemap) {
+      res.type('application/xml');
+      return res.send(cachedSitemap);
+    }
+
     const database = initDB();
     const host = req.headers.host || 'localhost:3000';
     const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
@@ -895,6 +992,9 @@ app.get('/sitemap.xml', (req, res) => {
 
     xml += `\n</urlset>`;
     
+    // Cache the XML sitemap layout for 1 hour to protect database cycles
+    apiCache.set(cacheKey, xml, 3600000);
+
     res.type('application/xml');
     res.send(xml);
   } catch (err) {
@@ -913,8 +1013,28 @@ async function serveApp() {
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
+    
+    // Aggressive cache settings for Vite production static bundle hashed assets
+    app.use('/assets', express.static(path.join(distPath, 'assets'), {
+      maxAge: '365d',
+      immutable: true,
+      fallthrough: false
+    }));
+
+    // Standard short expiration caching for HTML router and assets in dist folder
+    app.use(express.static(distPath, {
+      maxAge: '1h',
+      setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.html')) {
+          res.setHeader('Cache-Control', 'public, no-cache, must-revalidate');
+        } else {
+          res.setHeader('Cache-Control', 'public, max-age=86400');
+        }
+      }
+    }));
+
     app.get('*', (req, res) => {
+      res.setHeader('Cache-Control', 'public, no-cache, must-revalidate');
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }
